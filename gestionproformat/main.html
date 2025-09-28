@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Devis Professionnel - ITAPPRO POLYCYCLES</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .header-app {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header-app h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header-app p {
+            opacity: 0.9;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.05);
+        }
+
+        .background-upload {
+            background: #f8f9fa;
+            border: 2px dashed #1e3c72;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .background-upload:hover {
+            border-color: #2a5298;
+            background: #e3f2fd;
+        }
+
+        .background-upload.dragover {
+            border-color: #56ab2f;
+            background: #f1f8e9;
+            transform: scale(1.02);
+        }
+
+        #backgroundInput {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+        }
+
+        .background-preview {
+            margin-top: 15px;
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            object-fit: contain;
+        }
+
+        .background-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 4px solid #1e3c72;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card h3 {
+            color: #1e3c72;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-weight: 500;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+        }
+
+        #devis {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* Ajout d'un arrière-plan avec des lignes discrètes */
+        .devis-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(to right, #000 1px, transparent 1px),
+                linear-gradient(to bottom, #000 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .devis-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .devis-header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .company-logo {
+            max-width: 100%;
+            height: auto;
+            max-height: 120px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .company-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .company-name {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .company-details {
+            opacity: 0.95;
+            line-height: 1.6;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+        }
+
+        .devis-title {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #1e3c72;
+        }
+
+        .devis-title h2 {
+            color: #2c3e50;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .devis-number {
+            color: #1e3c72;
+            font-weight: 700;
+        }
+
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            min-width: 600px;
+        }
+
+        th {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 15px 8px;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+
+        tr:hover td {
+            background: #e3f2fd !important;
+            transition: background 0.2s ease;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        .totaux {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px 20px;
+            border-radius: 15px;
+            margin: 20px;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(30, 60, 114, 0.1);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .total-line:last-child {
+            border-bottom: 2px solid #1e3c72;
+            font-weight: 700;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            color: #2c3e50;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+
+        .montant-lettres {
+            background: #f1f8e9;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-style: italic;
+            border: 1px dashed #4caf50;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .arrete {
+            background: #1e3c72;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-style: italic;
+            margin: 20px;
+            border-radius: 10px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .footer {
+            padding: 30px 20px;
+            text-align: right;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .signature-area {
+            margin-top: 20px;
+        }
+
+        .cachet-placeholder {
+            width: 120px;
+            height: 80px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 90vw;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Messages d'alerte */
+        .alert {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .controls {
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+            
+            .table-container {
+                padding: 10px;
+            }
+            
+            .totaux, .montant-lettres, .arrete {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .footer {
+                padding: 20px 15px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+            
+            th, td {
+                padding: 8px 4px;
+                font-size: 0.75rem;
+            }
+            
+            input[type="text"], input[type="number"] {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media print {
+            body { 
+                background: white; 
+                padding: 0;
+            }
+            .container { 
+                box-shadow: none; 
+                border-radius: 0;
+            }
+            .header-app, .controls, .stats, .background-upload { 
+                display: none; 
+            }
+            .content {
+                padding: 0;
+            }
+        }
+
+        /* Animations d'amélioration */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-app">
+            <h1><i class="fas fa-file-invoice"></i> Générateur de Devis</h1>
+            <p>Solution professionnelle ITAPPRO POLYCYCLES</p>
+        </div>
+
+        <div class="content">
+            <!-- Messages d'alerte -->
+            <div id="alertSuccess" class="alert alert-success"></div>
+            <div id="alertError" class="alert alert-error"></div>
+
+            <!-- Section pour l'arrière-plan personnalisé -->
+            <div class="background-upload" id="backgroundUpload">
+                <i class="fas fa-image" style="font-size: 2rem; color: #1e3c72; margin-bottom: 10px;"></i>
+                <h3 style="color: #1e3c72; margin-bottom: 10px;">Arrière-plan personnalisé (Optionnel)</h3>
+                <p style="color: #666; margin-bottom: 15px;">Glissez-déposez une image ou cliquez pour sélectionner un fichier</p>
+                <label for="backgroundInput" class="upload-label">
+                    <i class="fas fa-upload"></i> Choisir une image
+                </label>
+                <input type="file" id="backgroundInput" accept="image/*">
+                <div id="backgroundPreview" style="display: none;">
+                    <img id="previewImage" class="background-preview" alt="Aperçu">
+                    <div class="background-info">
+                        <p id="imageInfo"></p>
+                        <button class="btn btn-danger" onclick="removeBackground()" style="margin-top: 10px;">
+                            <i class="fas fa-times"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="ajouterLigne()">
+                    <i class="fas fa-plus"></i> Ajouter Ligne
+                </button>
+                <button class="btn btn-success" onclick="genererPDF()">
+                    <i class="fas fa-file-pdf"></i> Générer PDF
+                </button>
+                <button class="btn btn-info" onclick="imprimerDevis()">
+                    <i class="fas fa-print"></i> Imprimer
+                </button>
+                <button class="btn btn-primary" onclick="viderDevis()">
+                    <i class="fas fa-trash-alt"></i> Nouveau Devis
+                </button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="statLignes">0</h3>
+                    <p>Lignes</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="statHT">0 FCFA</h3>
+                    <p>Montant HT</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="statTTC">0 FCFA</h3>
+                    <p>Montant TTC</p>
+                </div>
+            </div>
+
+            <div id="devis">
+                <div class="devis-background"></div>
+                <div class="devis-content">
+                    <div class="devis-header">
+                        <div class="company-info">
+                            <div class="company-name">ITAPPRO POLYCYCLES SARL</div>
+                            <div class="company-details">
+                                PRESTATION DE SERVICES-FOURNITURES DIVERSES-TRAVAUX PUBLICS-ETUDES ET REALISATIONS<br>
+                                B.P:1311 Douala-139 EDEA-Tél:(237) 690 27 91 83/696 92 88 33<br>
+                                Email: itappros@gmail.fr - yahoo:itappros@yahoo.fr<br>
+                                NUI: MO7131211725ID - RCCM:572/EDA/1990<br>
+                                Douala hôtel cityzen bonamoussadi - (+237) 690 27 91 83
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="devis-title">
+                        <h2>DEVIS N° <span class="devis-number" id="devisId">DEV-2024-001</span></h2>
+                        <p>Date: <span id="dateDevis"></span></p>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="tableau">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Désignation</th>
+                                    <th style="width: 15%">Quantité</th>
+                                    <th style="width: 20%">Prix Unitaire (FCFA)</th>
+                                    <th style="width: 20%">Total (FCFA)</th>
+                                    <th style="width: 5%">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableauBody">
+                            </tbody>
+                        </table>
+
+                        <div id="emptyState" class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>Aucune ligne ajoutée. Cliquez sur "Ajouter Ligne" pour commencer.</p>
+                        </div>
+                    </div>
+
+                    <div class="totaux" id="totauxSection" style="display: none;">
+                        <div class="total-line">
+                            <span>Montant HT:</span>
+                            <span><strong id="montantHT">0</strong> FCFA</span>
+                        </div>
+                        <div class="total-line">
+                            <span>TVA (19,25%):</span>
+                            <span><strong id="tva">0</strong> FCFA</span>
+                        </div>
+                        <div class="total-line">
+                            <span>Montant TTC:</span>
+                            <span><strong id="montantTTC">0</strong> FCFA</span>
+                        </div>
+                    </div>
+
+                    <div class="montant-lettres" id="montantLettresSection" style="display: none;">
+                        <p><strong>Montant en lettres:</strong> <span id="montantEnLettres"></span></p>
+                    </div>
+
+                    <div class="arrete" id="arreteSection" style="display: none;">
+                        <p id="arrete"></p>
+                    </div>
+
+                    <div class="footer">
+                        <div class="signature-area">
+                            <p><strong>Le Directeur</strong></p>
+                            <div class="cachet-placeholder">
+                                Cachet & Signature
+                            </div>
+                            <p><small>Devis valable 30 jours</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Génération du PDF...</h3>
+            <p>Veuillez patienter quelques instants</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialisation des variables globales
+        const { jsPDF } = window.jspdf;
+        let ligneCounter = 0;
+        let backgroundImage = null;
+        let devisCounter = 1;
+
+        // Fonction pour convertir les nombres en lettres
+        function nombreEnLettres(nombre) {
+            const unite = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+            const dizaine = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+            
+            if (nombre === 0) return 'zéro';
+            
+            let reste = nombre;
+            let mots = '';
+            
+            // Traitement des millions
+            if (reste >= 1000000) {
+                const millions = Math.floor(reste / 1000000);
+                mots += (millions === 1 ? 'un million' : nombreEnLettres(millions) + ' millions') + ' ';
+                reste %= 1000000;
+            }
+            
+            // Traitement des milliers
+            if (reste >= 1000) {
+                const milliers = Math.floor(reste / 1000);
+                if (milliers === 1) {
+                    mots += 'mille ';
+                } else {
+                    mots += nombreEnLettres(milliers) + ' mille ';
+                }
+                reste %= 1000;
+            }
+            
+            // Traitement des centaines
+            if (reste >= 100) {
+                const centaines = Math.floor(reste / 100);
+                if (centaines === 1) {
+                    mots += 'cent ';
+                } else {
+                    mots += unite[centaines] + ' cent ';
+                }
+                reste %= 100;
+            }
+            
+            // Traitement des dizaines et unités
+            if (reste > 0) {
+                if (mots !== '') mots += '';
+                
+                if (reste < 20) {
+                    mots += unite[reste];
+                } else {
+                    const d = Math.floor(reste / 10);
+                    const u = reste % 10;
+                    
+                    if (d === 7 || d === 9) {
+                        mots += dizaine[d] + '-' + unite[10 + u];
+                    } else {
+                        mots += dizaine[d];
+                        if (u === 1 && d !== 8) {
+                            mots += ' et un';
+                        } else if (u > 1) {
+                            mots += '-' + unite[u];
+                        } else if (u === 0 && d === 8) {
+                            mots += 's';
+                        }
+                    }
+                }
+            }
+            
+            return mots.trim();
+        }
+
+        // Fonction pour formater le montant en lettres
+        function formatMontantEnLettres(montant) {
+            const partieEntiere = Math.floor(montant);
+            const partieDecimale = Math.round((montant - partieEntiere) * 100);
+            
+            let resultat = nombreEnLettres(partieEntiere) + ' francs CFA';
+            
+            if (partieDecimale > 0) {
+                resultat += ' et ' + nombreEnLettres(partieDecimale) + ' centimes';
+            }
+            
+            return resultat;
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser la date du devis
+            document.getElementById('dateDevis').textContent = new Date().toLocaleDateString('fr-FR');
+            
+            // Générer un numéro de devis unique
+            genererNumeroDevis();
+            
+            // Initialiser les animations
+            initAnimations();
+            
+            // Initialiser le drag & drop pour l'arrière-plan
+            initBackgroundUpload();
+            
+            // Vérifier s'il y a des données sauvegardées
+            chargerDonneesSauvegardees();
+        });
+
+        // Initialiser les animations
+        function initAnimations() {
+            const elements = document.querySelectorAll('.stat-card, .btn');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.5s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }
+
+        // Initialiser le drag & drop pour l'arrière-plan
+        function initBackgroundUpload() {
+            const backgroundUpload = document.getElementById('backgroundUpload');
+            const backgroundInput = document.getElementById('backgroundInput');
+            
+            // Gestion du drag & drop
+            backgroundUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                backgroundUpload.classList.add('dragover');
+            });
+            
+            backgroundUpload.addEventListener('dragleave', () => {
+                backgroundUpload.classList.remove('dragover');
+            });
+            
+            backgroundUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                backgroundUpload.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleImageFile(files[0]);
+                }
+            });
+            
+            // Gestion du click
+            backgroundInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleImageFile(e.target.files[0]);
+                }
+            });
+        }
+
+        // Gérer le fichier image uploadé
+        function handleImageFile(file) {
+            // Vérifier le type de fichier
+            if (!file.type.startsWith('image/')) {
+                showErrorMessage('Veuillez sélectionner un fichier image valide.');
+                return;
+            }
+            
+            // Vérifier la taille (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showErrorMessage('L\'image est trop volumineuse. Taille maximum : 5MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                backgroundImage = e.target.result;
+                showBackgroundPreview(file);
+                showSuccessMessage('Image d\'arrière-plan ajoutée avec succès !');
+                sauvegarderDonnees();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Afficher l'aperçu de l'image d'arrière-plan
+        function showBackgroundPreview(file) {
+            const preview = document.getElementById('backgroundPreview');
+            const previewImage = document.getElementById('previewImage');
+            const imageInfo = document.getElementById('imageInfo');
+            
+            previewImage.src = backgroundImage;
+            imageInfo.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            preview.style.display = 'block';
+        }
+
+        // Supprimer l'arrière-plan
+        function removeBackground() {
+            backgroundImage = null;
+            document.getElementById('backgroundPreview').style.display = 'none';
+            document.getElementById('backgroundInput').value = '';
+            showSuccessMessage('Image d\'arrière-plan supprimée');
+            sauvegarderDonnees();
+        }
+
+        // Générer un numéro de devis unique
+        function genererNumeroDevis() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const num = devisCounter.toString().padStart(3, '0');
+            const devisId = `DEV-${year}-${month}-${num}`;
+            document.getElementById('devisId').textContent = devisId;
+            return devisId;
+        }
+
+        // Ajouter une ligne au tableau
+        function ajouterLigne() {
+            ligneCounter++;
+            const tbody = document.getElementById('tableauBody');
+            const row = tbody.insertRow();
+            
+            row.innerHTML = `
+                <td><input type="text" placeholder="Description du produit/service" id="desc_${ligneCounter}" oninput="sauvegarderDonnees()"></td>
+                <td><input type="number" value="1" min="1" step="1" onchange="calculer()" id="qty_${ligneCounter}" oninput="sauvegarderDonnees()"></td>
+                <td><input type="number" value="0" min="0" step="0.01" onchange="calculer()" id="price_${ligneCounter}" oninput="sauvegarderDonnees()"></td>
+                <td class="totalLigne" id="total_${ligneCounter}">0 FCFA</td>
+                <td><button class="btn btn-danger" onclick="supprimerLigne(this)" title="Supprimer cette ligne">
+                    <i class="fas fa-times"></i>
+                </button></td>
+            `;
+
+            row.classList.add('slide-in');
+            masquerEtatVide();
+            calculer();
+            sauvegarderDonnees();
+        }
+
+        // Supprimer une ligne du tableau
+        function supprimerLigne(btn) {
+            const row = btn.closest('tr');
+            
+            row.style.transition = 'all 0.3s ease';
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(-100%)';
+            
+            setTimeout(() => {
+                row.remove();
+                calculer();
+                verifierEtatVide();
+                sauvegarderDonnees();
+            }, 300);
+        }
+
+        // Calculer les totaux
+        function calculer() {
+            const tbody = document.getElementById('tableauBody');
+            let montantHT = 0;
+            let nombreLignes = 0;
+
+            for (let row of tbody.rows) {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length >= 3) {
+                    const qty = parseFloat(inputs[1].value) || 0;
+                    const price = parseFloat(inputs[2].value) || 0;
+                    const total = qty * price;
+                    
+                    row.cells[3].innerHTML = `${total.toLocaleString('fr-FR')} FCFA`;
+                    montantHT += total;
+                    nombreLignes++;
+                }
+            }
+
+            const tva = montantHT * 0.1925;
+            const ttc = montantHT + tva;
+
+            document.getElementById('montantHT').textContent = montantHT.toLocaleString('fr-FR');
+            document.getElementById('tva').textContent = tva.toLocaleString('fr-FR', {maximumFractionDigits: 2});
+            document.getElementById('montantTTC').textContent = ttc.toLocaleString('fr-FR', {maximumFractionDigits: 2});
+            
+            // Mettre à jour le montant en lettres
+            document.getElementById('montantEnLettres').textContent = formatMontantEnLettres(ttc);
+            
+            const arrete = `Arrêté du présent devis à la somme de ${ttc.toLocaleString('fr-FR', {maximumFractionDigits: 2})} FCFA.`;
+            document.getElementById('arrete').textContent = arrete;
+
+            document.getElementById('statLignes').textContent = nombreLignes;
+            document.getElementById('statHT').textContent = `${montantHT.toLocaleString('fr-FR')} FCFA`;
+            document.getElementById('statTTC').textContent = `${ttc.toLocaleString('fr-FR', {maximumFractionDigits: 2})} FCFA`;
+
+            const totauxSection = document.getElementById('totauxSection');
+            const arreteSection = document.getElementById('arreteSection');
+            const montantLettresSection = document.getElementById('montantLettresSection');
+            
+            if (nombreLignes > 0) {
+                totauxSection.style.display = 'block';
+                arreteSection.style.display = 'block';
+                montantLettresSection.style.display = 'block';
+            } else {
+                totauxSection.style.display = 'none';
+                arreteSection.style.display = 'none';
+                montantLettresSection.style.display = 'none';
+            }
+        }
+
+        // Masquer l'état vide
+        function masquerEtatVide() {
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        // Vérifier l'état vide
+        function verifierEtatVide() {
+            const tbody = document.getElementById('tableauBody');
+            if (tbody.rows.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+            }
+        }
+
+        // Vider le devis
+        function viderDevis() {
+            if (confirm('Êtes-vous sûr de vouloir créer un nouveau devis ? Toutes les données actuelles seront perdues.')) {
+                document.getElementById('tableauBody').innerHTML = '';
+                ligneCounter = 0;
+                devisCounter++;
+                genererNumeroDevis();
+                document.getElementById('dateDevis').textContent = new Date().toLocaleDateString('fr-FR');
+                calculer();
+                verifierEtatVide();
+                localStorage.removeItem('devisData');
+                showSuccessMessage('Nouveau devis créé avec succès !');
+            }
+        }
+
+        // Générer le PDF
+        function genererPDF() {
+            // Afficher le loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Utiliser setTimeout pour permettre à l'UI de se mettre à jour
+            setTimeout(() => {
+                const devisElement = document.getElementById('devis');
+                
+                // Utiliser html2canvas pour capturer le devis
+                html2canvas(devisElement, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210; // A4 width in mm
+                    const pageHeight = 295; // A4 height in mm
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    
+                    // Ajouter l'image de fond si elle existe
+                    if (backgroundImage) {
+                        pdf.addImage(backgroundImage, 'JPEG', 0, 0, imgWidth, pageHeight);
+                    }
+                    
+                    // Ajouter le contenu du devis
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    
+                    // Ajouter des pages supplémentaires si nécessaire
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        if (backgroundImage) {
+                            pdf.addImage(backgroundImage, 'JPEG', 0, 0, imgWidth, pageHeight);
+                        }
+                        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+                    
+                    // Télécharger le PDF
+                    const devisId = document.getElementById('devisId').textContent;
+                    pdf.save(`Devis_${devisId}.pdf`);
+                    
+                    // Cacher le loading
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    showSuccessMessage('PDF généré avec succès !');
+                }).catch(error => {
+                    console.error('Erreur lors de la génération du PDF:', error);
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showErrorMessage('Erreur lors de la génération du PDF. Veuillez réessayer.');
+                });
+            }, 500);
+        }
+
+        // Imprimer le devis
+        function imprimerDevis() {
+            window.print();
+        }
+
+        // Sauvegarder les données dans le localStorage
+        function sauvegarderDonnees() {
+            const tbody = document.getElementById('tableauBody');
+            const lignes = [];
+            
+            for (let row of tbody.rows) {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length >= 3) {
+                    lignes.push({
+                        description: inputs[0].value,
+                        quantite: inputs[1].value,
+                        prix: inputs[2].value
+                    });
+                }
+            }
+            
+            const devisData = {
+                lignes: lignes,
+                backgroundImage: backgroundImage,
+                devisId: document.getElementById('devisId').textContent,
+                dateDevis: document.getElementById('dateDevis').textContent
+            };
+            
+            localStorage.setItem('devisData', JSON.stringify(devisData));
+        }
+
+        // Charger les données sauvegardées
+        function chargerDonneesSauvegardees() {
+            const devisDataStr = localStorage.getItem('devisData');
+            if (devisDataStr) {
+                try {
+                    const devisData = JSON.parse(devisDataStr);
+                    
+                    // Restaurer l'ID et la date du devis
+                    if (devisData.devisId) {
+                        document.getElementById('devisId').textContent = devisData.devisId;
+                    }
+                    
+                    if (devisData.dateDevis) {
+                        document.getElementById('dateDevis').textContent = devisData.dateDevis;
+                    }
+                    
+                    // Restaurer l'image d'arrière-plan
+                    if (devisData.backgroundImage) {
+                        backgroundImage = devisData.backgroundImage;
+                        document.getElementById('previewImage').src = backgroundImage;
+                        document.getElementById('backgroundPreview').style.display = 'block';
+                        document.getElementById('imageInfo').textContent = 'Image restaurée';
+                    }
+                    
+                    // Restaurer les lignes du devis
+                    if (devisData.lignes && devisData.lignes.length > 0) {
+                        devisData.lignes.forEach(ligne => {
+                            ligneCounter++;
+                            const tbody = document.getElementById('tableauBody');
+                            const row = tbody.insertRow();
+                            
+                            row.innerHTML = `
+                                <td><input type="text" placeholder="Description du produit/service" id="desc_${ligneCounter}" value="${ligne.description || ''}" oninput="sauvegarderDonnees()"></td>
+                                <td><input type="number" value="${ligne.quantite || 1}" min="1" step="1" onchange="calculer()" id="qty_${ligneCounter}" oninput="sauvegarderDonnees()"></td>
+                                <td><input type="number" value="${ligne.prix || 0}" min="0" step="0.01" onchange="calculer()" id="price_${ligneCounter}" oninput="sauvegarderDonnees()"></td>
+                                <td class="totalLigne" id="total_${ligneCounter}">0 FCFA</td>
+                                <td><button class="btn btn-danger" onclick="supprimerLigne(this)" title="Supprimer cette ligne">
+                                    <i class="fas fa-times"></i>
+                                </button></td>
+                            `;
+                        });
+                        
+                        masquerEtatVide();
+                        calculer();
+                        showSuccessMessage('Devis restauré avec succès !');
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du chargement des données:', error);
+                    showErrorMessage('Erreur lors de la restauration des données.');
+                }
+            }
+        }
+
+        // Afficher un message de succès
+        function showSuccessMessage(message) {
+            const alert = document.getElementById('alertSuccess');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        // Afficher un message d'erreur
+        function showErrorMessage(message) {
+            const alert = document.getElementById('alertError');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
